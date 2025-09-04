@@ -16,6 +16,9 @@ sudo apt install screen tmux
 tmux new-session -s opencv_build
 tmux attach-session -t opencv_build
 tmux list-sessions
+
+# To leave tmux session when inside press:
+Ctrl+b, then d
 ```
 
 ## System Deps
