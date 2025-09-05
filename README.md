@@ -26,7 +26,7 @@ Ctrl+b, then d
 sudo apt install screen git
 
 # build deps
-sudo apt update && sudo apt install -y cmake g++ wget unzip libopenblas-dev
+sudo apt update && sudo apt install -y cmake g++ wget unzip libopenblas-dev python3-dev
 
 
 # shared libraries
@@ -39,6 +39,7 @@ sudo apt install \
     zlib1g-dev \
     libavcodec-dev \
     libavformat-dev
+
 ```
 
 Start named session
@@ -88,9 +89,50 @@ export UV_EXTRA_INDEX_URL=https://pypi.org/simple
 export UV_CACHE_DIR=/media/ssd/uv-cache
 mkdir $UV_CACHE_DIR
 
-uv pip install "numpy==2.0.2" packaging "scikit-build>=0.14.0" "setuptools==59.2.0"
+uv pip install "numpy==2.0.2" packaging "scikit-build>=0.14.0" "setuptools==59.2.0" pip
 
 uv build -v --wheel .
+```
+
+
+## Modify CMake Flags
+
+`nano setup.py`
+```
+    cmake_args = (
+        (ci_cmake_generator if is_CI_build else [])
+        + [
+            # skbuild inserts PYTHON_* vars. That doesn't satisfy opencv build scripts in case of Py3
+            "-DPYTHON3_EXECUTABLE=%s" % sys.executable,
+            "-DPYTHON_DEFAULT_EXECUTABLE=%s" % sys.executable,
+            "-DPYTHON3_INCLUDE_DIR=%s" % python_include_dir,
+            "-DPYTHON3_LIBRARY=%s" % python_lib_path,
+            "-DBUILD_opencv_python3=ON",
+            "-DBUILD_opencv_python2=OFF",
+            # Disable the Java build by default as it is not needed
+            "-DBUILD_opencv_java=%s" % build_java,
+            # Relative dir to install the built module to in the build tree.
+            # The default is generated from sysconfig, we'd rather have a constant for simplicity
+            "-DOPENCV_PYTHON3_INSTALL_PATH=python",
+            # Otherwise, opencv scripts would want to install `.pyd' right into site-packages,
+            # and skbuild bails out on seeing that
+            "-DINSTALL_CREATE_DISTRIB=ON",
+            # See opencv/CMakeLists.txt for options and defaults
+            "-DBUILD_opencv_apps=OFF",
+            "-DBUILD_opencv_freetype=OFF",
+            "-DBUILD_SHARED_LIBS=OFF",
+            "-DBUILD_JPEG=OFF",
+            "-DBUILD_PNG=OFF",
+            "-DBUILD_TIFF=OFF",
+            "-DBUILD_WEBP=OFF",
+            "-DBUILD_OPENJPEG=OFF",
+            "-DBUILD_ZLIB=OFF",
+            "-DBUILD_TESTS=OFF",
+            "-DBUILD_PERF_TESTS=OFF",
+            "-DBUILD_DOCS=OFF",
+            "-DPYTHON3_LIMITED_API=ON",
+            "-DBUILD_OPENEXR=OFF",
+        ]
 ```
 
 

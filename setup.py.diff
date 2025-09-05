@@ -1,0 +1,35 @@
+git diff setup.py
+diff --git a/setup.py b/setup.py
+index 8941218..8b81c68 100755
+--- a/setup.py
++++ b/setup.py
+@@ -184,11 +184,17 @@ def main():
+             "-DBUILD_opencv_apps=OFF",
+             "-DBUILD_opencv_freetype=OFF",
+             "-DBUILD_SHARED_LIBS=OFF",
++            "-DBUILD_JPEG=OFF",
++            "-DBUILD_PNG=OFF",
++            "-DBUILD_TIFF=OFF",
++            "-DBUILD_WEBP=OFF",
++            "-DBUILD_OPENJPEG=OFF",
++            "-DBUILD_ZLIB=OFF",
+             "-DBUILD_TESTS=OFF",
+             "-DBUILD_PERF_TESTS=OFF",
+             "-DBUILD_DOCS=OFF",
+             "-DPYTHON3_LIMITED_API=ON",
+-            "-DBUILD_OPENEXR=ON",
++            "-DBUILD_OPENEXR=OFF",
+         ]
+         + (
+             # CMake flags for windows/arm64 build
+@@ -219,8 +225,8 @@ def main():
+                 "-DWITH_MSMF=OFF"
+             )  # see: https://github.com/skvark/opencv-python/issues/263
+
+-    if sys.platform.startswith("linux") and not is64 and "bdist_wheel" in sys.argv:
+-        subprocess.check_call("patch -p0 < patches/patchOpenEXR", shell=True)
++#    if sys.platform.startswith("linux") and not is64 and "bdist_wheel" in sys.argv:
++#        subprocess.check_call("patch -p0 < patches/patchOpenEXR", shell=True)
+
+     # OS-specific components during CI builds
+     if is_CI_build:
