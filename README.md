@@ -91,6 +91,11 @@ mkdir $UV_CACHE_DIR
 
 uv pip install "numpy==2.0.2" packaging "scikit-build>=0.14.0" "setuptools==59.2.0" pip
 
+# if you need to install your previously compiled numpy as well
+uv pip install -v \
+    ../numpy/dist/numpy-2.1.3-cp313-cp313-linux_armv7l.whl \
+    packaging "scikit-build>=0.14.0" "setuptools==59.2.0" pip
+
 uv build -v --wheel .
 ```
 
@@ -137,6 +142,40 @@ uv build -v --wheel .
 
 
 
+## NumPy
+So you need to compile NumPy as well? Sometime piwheels.org might have a compiled wheel for numpy, but it was compiled with a different OS version, which has a different version of GLIBC. You might see an error like the following:
+
+```
+Traceback (most recent call last):
+  File "/media/ssd/uv-cache/builds-v0/.tmpvb8KJb/lib/python3.13/site-packages/numpy/_core/__init__.py", line 23, in <module>
+    from . import multiarray
+  File "/media/ssd/uv-cache/builds-v0/.tmpvb8KJb/lib/python3.13/site-packages/numpy/_core/multiarray.py", line 10, in <module>
+    from . import overrides
+  File "/media/ssd/uv-cache/builds-v0/.tmpvb8KJb/lib/python3.13/site-packages/numpy/_core/overrides.py", line 8, in <module>
+    from numpy._core._multiarray_umath import (
+        add_docstring,  _get_implementing_args, _ArrayFunctionDispatcher)
+ImportError: /lib/arm-linux-gnueabihf/libc.so.6: version `GLIBC_2.38' not found (required by /media/ssd/uv-cache/builds-v0/.tmpvb8KJb/lib/python3.13/site-packages/numpy/_core/_multiarray_umath.cpython-313-arm-linux-gnueabihf.so)
+```
+
+In this case, you might need to compile NumPy for your OS as well.
+
+```bash
+git clone --recursive --depth=1 https://github.com/numpy/numpy.git
+cd numpy
+git fetch --tags
+
+# from opencv-python/pyproject.toml
+#   "numpy<2.0; python_version<'3.9'",
+#   "numpy==2.0.2; python_version>='3.9' and python_version<'3.13'",
+#   "numpy==2.1.3; python_version=='3.13'",
+
+
+git checkout v2.1.3
+git submodule update --init
+
+uv build -v --wheel .
+
+```
 
 
 ## Other ways?
